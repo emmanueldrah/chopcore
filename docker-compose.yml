@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: chopcore
+      POSTGRES_USER: chopcore
+      POSTGRES_PASSWORD: chopcore_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://chopcore:chopcore_pass@db:5432/chopcore
+    ports:
+      - "8768:8768"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

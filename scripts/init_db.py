@@ -1,0 +1,34 @@
+import os
+import sys
+
+def init_db():
+    print("Initializing database...")
+    # Logic to run alembic upgrade head
+    # or simple create_all if migrations aren't bundled
+    from backend.database import engine, Base
+    # Import all models to ensure they are registered
+    import backend.models.business
+    import backend.models.user
+    import backend.models.category
+    import backend.models.menu_item
+    import backend.models.modifier
+    import backend.models.table
+    import backend.models.order
+    import backend.models.order_item
+    import backend.models.kitchen_ticket
+    import backend.models.bill
+    import backend.models.payment
+    import backend.models.reservation
+    import backend.models.event
+    import backend.models.delivery
+    import backend.models.ingredient
+    import backend.models.stock
+    import backend.models.staff
+    import backend.models.customer
+    import backend.models.loyalty
+
+    Base.metadata.create_all(bind=engine)
+    print("Database initialized.")
+
+if __name__ == "__main__":
+    init_db()
