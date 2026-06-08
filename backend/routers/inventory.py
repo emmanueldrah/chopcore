@@ -31,6 +31,29 @@ def create_ingredient(data: IngredientCreate, db: Session = Depends(get_db)):
     db.refresh(ingredient)
     return ingredient
 
+class RecipeItem(BaseModel):
+    ingredient_id: str
+    quantity: int
+
+class RecipeUpdate(BaseModel):
+    items: List[RecipeItem]
+
+@router.post("/recipes/{menu_item_id}")
+def update_recipe(menu_item_id: str, data: RecipeUpdate, db: Session = Depends(get_db)):
+    # Clear existing recipe
+    db.query(Recipe).filter(Recipe.menu_item_id == menu_item_id).delete()
+
+    for item in data.items:
+        recipe = Recipe(
+            menu_item_id=menu_item_id,
+            ingredient_id=item.ingredient_id,
+            quantity=item.quantity
+        )
+        db.add(recipe)
+
+    db.commit()
+    return {"success": True}
+
 @router.post("/stock")
 def update_stock(data: StockUpdate, db: Session = Depends(get_db)):
     stock = db.query(Stock).filter(Stock.ingredient_id == data.ingredient_id).first()

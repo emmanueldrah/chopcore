@@ -1,8 +1,7 @@
-from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from backend.database import Base
-import uuid
-from datetime import datetime
+from backend.models.base import BaseMixin
 import enum
 
 class OrderStatus(enum.Enum):
@@ -18,10 +17,9 @@ class OrderType(enum.Enum):
     TAKEAWAY = "TAKEAWAY"
     DELIVERY = "DELIVERY"
 
-class Order(Base):
+class Order(Base, BaseMixin):
     __tablename__ = "orders"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     order_number = Column(String, nullable=False) # Sequential daily number e.g. #0042
     table_id = Column(String, ForeignKey("tables.id"), nullable=True)
     customer_name = Column(String, nullable=True)
@@ -36,10 +34,6 @@ class Order(Base):
     tax_amount = Column(Integer, default=0)
     delivery_fee = Column(Integer, default=0)
     total_amount = Column(Integer, default=0)
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)
 
     table = relationship("Table")
     waiter = relationship("User", foreign_keys=[waiter_id])

@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String, DateTime, Enum, Boolean
+from sqlalchemy import Column, String, Enum, Boolean
 from backend.database import Base
-import uuid
-from datetime import datetime
+from backend.models.base import BaseMixin
 import enum
 
 class UserRole(enum.Enum):
@@ -15,16 +14,11 @@ class UserRole(enum.Enum):
     INVENTORY_MANAGER = "INVENTORY_MANAGER"
     ACCOUNTANT = "ACCOUNTANT"
 
-class User(Base):
+class User(Base, BaseMixin):
     __tablename__ = "users"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     username = Column(String, unique=True, index=True, nullable=False)
     full_name = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False)
     is_active = Column(Boolean, default=True)
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)

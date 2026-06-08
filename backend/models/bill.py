@@ -1,8 +1,7 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Enum, Boolean
+from sqlalchemy import Column, String, Integer, ForeignKey, Enum, Boolean
 from sqlalchemy.orm import relationship
 from backend.database import Base
-import uuid
-from datetime import datetime
+from backend.models.base import BaseMixin
 import enum
 
 class BillStatus(enum.Enum):
@@ -10,10 +9,9 @@ class BillStatus(enum.Enum):
     PAID = "PAID"
     VOIDED = "VOIDED"
 
-class Bill(Base):
+class Bill(Base, BaseMixin):
     __tablename__ = "bills"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     order_id = Column(String, ForeignKey("orders.id"), nullable=False)
     status = Column(Enum(BillStatus), default=BillStatus.OPEN)
 
@@ -24,10 +22,6 @@ class Bill(Base):
     total_amount = Column(Integer, default=0)
 
     is_split = Column(Boolean, default=False)
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)
 
     order = relationship("Order")
     payments = relationship("Payment", back_populates="bill")

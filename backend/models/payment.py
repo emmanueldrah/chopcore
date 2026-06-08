@@ -1,8 +1,7 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Enum
+from sqlalchemy import Column, String, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from backend.database import Base
-import uuid
-from datetime import datetime
+from backend.models.base import BaseMixin
 import enum
 
 class PaymentMethod(enum.Enum):
@@ -13,15 +12,12 @@ class PaymentMethod(enum.Enum):
     BANK_CARD = "BANK_CARD"
     LOYALTY_POINTS = "LOYALTY_POINTS"
 
-class Payment(Base):
+class Payment(Base, BaseMixin):
     __tablename__ = "payments"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     bill_id = Column(String, ForeignKey("bills.id"), nullable=False)
     amount = Column(Integer, nullable=False)
     method = Column(Enum(PaymentMethod), nullable=False)
     transaction_id = Column(String, nullable=True) # For mobile money / card
-
-    created_at = Column(DateTime, default=datetime.utcnow)
 
     bill = relationship("Bill", back_populates="payments")

@@ -1,13 +1,11 @@
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from backend.database import Base
-import uuid
-from datetime import datetime
+from backend.models.base import BaseMixin
 
-class MenuItem(Base):
+class MenuItem(Base, BaseMixin):
     __tablename__ = "menu_items"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     category_id = Column(String, ForeignKey("categories.id"), nullable=False)
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
@@ -19,9 +17,6 @@ class MenuItem(Base):
     tags = Column(JSON, default=[]) # e.g. ["Spicy", "Vegetarian"]
     time_availability = Column(JSON, default={"breakfast": True, "lunch": True, "dinner": True})
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)
-
     category = relationship("Category")
     modifier_groups = relationship("MenuItemModifierGroup", back_populates="menu_item")
+    recipes = relationship("Recipe", back_populates="menu_item")

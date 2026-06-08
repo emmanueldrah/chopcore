@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, String, Integer, Enum, ForeignKey, DateTime
 from backend.database import Base
-import uuid
-from datetime import datetime
+from backend.models.base import BaseMixin
 import enum
 
 class ReservationStatus(enum.Enum):
@@ -11,10 +10,9 @@ class ReservationStatus(enum.Enum):
     CANCELLED = "CANCELLED"
     NO_SHOW = "NO_SHOW"
 
-class Reservation(Base):
+class Reservation(Base, BaseMixin):
     __tablename__ = "reservations"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     customer_name = Column(String, nullable=False)
     customer_phone = Column(String, nullable=False)
     reservation_date = Column(DateTime, nullable=False)
@@ -22,7 +20,3 @@ class Reservation(Base):
     table_id = Column(String, ForeignKey("tables.id"), nullable=True)
     status = Column(Enum(ReservationStatus), default=ReservationStatus.CONFIRMED)
     special_requests = Column(String, nullable=True)
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)

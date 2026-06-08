@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String, Integer, Enum, DateTime, Boolean, JSON
+from sqlalchemy import Column, String, Integer, Enum, Boolean, JSON
 from backend.database import Base
-import uuid
-from datetime import datetime
+from backend.models.base import BaseMixin
 import enum
 
 class BusinessMode(enum.Enum):
@@ -10,10 +9,9 @@ class BusinessMode(enum.Enum):
     CHOP_BAR = "CHOP_BAR"
     CATERING = "CATERING"
 
-class Business(Base):
+class Business(Base, BaseMixin):
     __tablename__ = "business"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False)
     logo_url = Column(String, nullable=True)
     address = Column(String, nullable=True)
@@ -24,7 +22,3 @@ class Business(Base):
     tax_rate = Column(Integer, default=1500) # 15% in basis points
     tax_enabled = Column(Boolean, default=True)
     mode = Column(Enum(BusinessMode), nullable=False)
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)

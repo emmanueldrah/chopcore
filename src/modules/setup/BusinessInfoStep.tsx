@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 
-export const BusinessInfoStep: React.FC<{ onNext: (data: any) => void }> = ({ onNext }) => {
-  const [info, setInfo] = useState({
-    name: '',
-    address: '',
-    phone: '',
-    email: '',
-  });
+export const BusinessInfoStep: React.FC<{ onNext: (data: any) => void; initialData: any }> = ({ onNext, initialData }) => {
+  const [info, setInfo] = useState(initialData);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,47 +9,46 @@ export const BusinessInfoStep: React.FC<{ onNext: (data: any) => void }> = ({ on
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Step 1 — Business Info</h2>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Business Name</label>
-        <input
-          type="text" required
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          value={info.name} onChange={e => setInfo({...info, name: e.target.value})}
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Address</label>
-        <input
-          type="text"
-          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          value={info.address} onChange={e => setInfo({...info, address: e.target.value})}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Phone</label>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-2 gap-6">
+        <div className="col-span-2">
+          <label className="block text-sm font-bold text-gray-700 mb-1">Business Name</label>
           <input
-            type="text"
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            type="text" required placeholder="e.g. Tasty Bites Ghana"
+            className="w-full border-gray-200 border-2 rounded-xl p-3 focus:border-primary outline-none transition"
+            value={info.name} onChange={e => setInfo({...info, name: e.target.value})}
+          />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-bold text-gray-700 mb-1">Physical Address</label>
+          <input
+            type="text" placeholder="e.g. 123 Oxford Street, Osu, Accra"
+            className="w-full border-gray-200 border-2 rounded-xl p-3 focus:border-primary outline-none transition"
+            value={info.address} onChange={e => setInfo({...info, address: e.target.value})}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-1">Phone Number</label>
+          <input
+            type="text" placeholder="+233..."
+            className="w-full border-gray-200 border-2 rounded-xl p-3 focus:border-primary outline-none transition"
             value={info.phone} onChange={e => setInfo({...info, phone: e.target.value})}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <label className="block text-sm font-bold text-gray-700 mb-1">Email Address</label>
           <input
-            type="email"
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            type="email" placeholder="hello@business.com"
+            className="w-full border-gray-200 border-2 rounded-xl p-3 focus:border-primary outline-none transition"
             value={info.email} onChange={e => setInfo({...info, email: e.target.value})}
           />
         </div>
       </div>
       <button
         type="submit"
-        className="w-full bg-primary text-white py-2 rounded-md hover:bg-orange-700 transition"
+        className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:bg-orange-700 shadow-lg shadow-orange-200 transition"
       >
-        Next
+        Next Step: Select Business Type
       </button>
     </form>
   );

@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String, Integer, DateTime, Enum, JSON
+from sqlalchemy import Column, String, Integer, Enum, JSON, DateTime
 from backend.database import Base
-import uuid
-from datetime import datetime
+from backend.models.base import BaseMixin
 import enum
 
 class EventStatus(enum.Enum):
@@ -11,10 +10,9 @@ class EventStatus(enum.Enum):
     COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
 
-class Event(Base):
+class Event(Base, BaseMixin):
     __tablename__ = "events"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     client_name = Column(String, nullable=False)
     client_phone = Column(String, nullable=False)
     event_date = Column(DateTime, nullable=False)
@@ -29,7 +27,3 @@ class Event(Base):
     deposit_paid = Column(Integer, default=0)
 
     checklist = Column(JSON, default=[])
-
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    deleted_at = Column(DateTime, nullable=True)

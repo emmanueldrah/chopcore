@@ -5,6 +5,8 @@ from backend.models.order import Order, OrderStatus, OrderType
 from backend.models.order_item import OrderItem, OrderItemStatus
 from backend.models.table import Table, TableStatus
 from backend.routers.inventory import deduct_stock_for_order
+from backend.models.kitchen_ticket import KitchenTicket, KitchenTicketStatus
+from backend.websocket.kitchen import kitchen_manager
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
@@ -78,6 +80,19 @@ def create_order(data: OrderCreate, db: Session = Depends(get_db)):
             table.status = TableStatus.OCCUPIED
 
     db.commit()
+
+    # Create Kitchen Ticket
+    ticket = KitchenTicket(order_id=order.id)
+    db.add(ticket)
+    db.commit()
+
+    # WebSocket Broadcast
+    import asyncio
+    asyncio.run(kitchen_manager.broadcast({
+        "type": "NEW_TICKET",
+        "order_number": order.order_number
+    }))
+
     db.refresh(order)
     return order
 

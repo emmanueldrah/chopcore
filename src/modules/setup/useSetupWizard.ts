@@ -17,6 +17,7 @@ export const useSetupWizard = () => {
       full_name: '',
       username: '',
       password: '',
+      confirm_password: '',
     },
     mode: '',
   });
