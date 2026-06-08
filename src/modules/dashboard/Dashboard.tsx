@@ -1,15 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { LayoutDashboard, TrendingUp, ShoppingBag, Clock, Users, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, ShoppingBag, Clock, Users, ArrowUpRight, ArrowDownRight, Truck, Bell } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { LoadingSkeleton } from '../../components/shared/States';
+import { useBusinessStore, BusinessMode } from '../../store/businessStore';
+import { useTerminology } from '../../hooks/useTerminology';
 
 export const Dashboard: React.FC = () => {
+  const { mode } = useBusinessStore();
+  const t = useTerminology(mode);
+  const [notifications, setNotifications] = useState<string[]>([]);
+
   const { data: summary, isLoading } = useQuery({
     queryKey: ['daily-summary'],
     queryFn: () => axios.get('http://localhost:8768/api/v1/reports/daily-summary').then(res => res.data),
   });
+
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8768/api/v1/kitchen/ws');
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'TICKET_UPDATED' && data.status === 'READY') {
+        setNotifications(prev => [`Order ${data.order_number || ''} is READY!`, ...prev].slice(0, 5));
+      }
+    };
+    return () => ws.close();
+  }, []);
 
   const mockChartData = [
     { name: '08:00', sales: 400 },
@@ -30,17 +47,36 @@ export const Dashboard: React.FC = () => {
             <h1 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic">Overview</h1>
             <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">Real-time operational insights</p>
         </div>
-        <div className="bg-white px-6 py-3 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center space-x-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
-            <span className="font-black text-xs text-slate-800 uppercase tracking-widest">System Live</span>
+
+        <div className="flex items-center space-x-6">
+            {notifications.length > 0 && (
+                <div className="flex items-center space-x-3 bg-primary text-white px-6 py-3 rounded-2xl shadow-xl shadow-orange-900/20 animate-bounce">
+                    <Bell size={18} />
+                    <span className="font-black text-xs uppercase tracking-widest">{notifications[0]}</span>
+                </div>
+            )}
+            <div className="bg-white px-6 py-3 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center space-x-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+                <span className="font-black text-xs text-slate-800 uppercase tracking-widest">System Live</span>
+            </div>
         </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title="Total Revenue" value={`₵ ${((summary?.revenue || 0) / 100).toFixed(2)}`} icon={TrendingUp} trend="+12.5%" color="text-green-600" bg="bg-green-50" />
-        <StatCard title="Total Orders" value={summary?.orders || 0} icon={ShoppingBag} trend="+5.2%" color="text-blue-600" bg="bg-blue-50" />
-        <StatCard title="Avg. Order" value={`₵ ${((summary?.avg_order_value || 0) / 100).toFixed(2)}`} icon={LayoutDashboard} trend="-1.2%" color="text-purple-600" bg="bg-purple-50" />
-        <StatCard title="Pending" value="5" icon={Clock} trend="Normal" color="text-orange-600" bg="bg-orange-50" />
+        <StatCard title="Gross Revenue" value={`₵ ${((summary?.revenue || 0) / 100).toFixed(2)}`} icon={TrendingUp} trend="+12.5%" color="text-green-600" bg="bg-green-50" />
+        <StatCard title={`Total ${t('orders')}`} value={summary?.orders || 0} icon={ShoppingBag} trend="+5.2%" color="text-blue-600" bg="bg-blue-50" />
+
+        {(mode === BusinessMode.SIT_DOWN || mode === BusinessMode.CHOP_BAR) && (
+            <StatCard title={`${t('tables')} Occupied`} value="8 / 24" icon={LayoutDashboard} trend="Active" color="text-purple-600" bg="bg-purple-50" />
+        )}
+
+        {(mode === BusinessMode.FAST_FOOD || mode === BusinessMode.CHOP_BAR) && (
+            <StatCard title="Active Deliveries" value="3" icon={Truck} trend="Normal" color="text-orange-600" bg="bg-orange-50" />
+        )}
+
+        {mode === BusinessMode.CATERING && (
+            <StatCard title="Upcoming Events" value="12" icon={Clock} trend="+2 this week" color="text-orange-600" bg="bg-orange-50" />
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -70,13 +106,18 @@ export const Dashboard: React.FC = () => {
 
         <div className="bg-slate-900 p-10 rounded-[3rem] shadow-2xl text-white relative overflow-hidden flex flex-col">
             <div className="relative z-10">
-                <h2 className="text-2xl font-black mb-1 tracking-tight">Quick Action</h2>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-10">Jump into service</p>
+                <h2 className="text-2xl font-black mb-1 tracking-tight">Quick Actions</h2>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-10">System Shortcuts</p>
 
                 <div className="space-y-4">
                     <ActionButton label="New Order" desc="Open POS Terminal" color="bg-primary" />
-                    <ActionButton label="Floor Plan" desc="Manage Tables" color="bg-slate-800" />
-                    <ActionButton label="Inventory" desc="Check Stock" color="bg-slate-800" />
+                    {(mode === BusinessMode.SIT_DOWN || mode === BusinessMode.CHOP_BAR) && (
+                        <ActionButton label="Floor Plan" desc={`Manage ${t('tables')}`} color="bg-slate-800" />
+                    )}
+                    {mode === BusinessMode.CATERING && (
+                        <ActionButton label="New Event" desc="Book Catering Event" color="bg-slate-800" />
+                    )}
+                    <ActionButton label="Inventory" desc="Check Stock Levels" color="bg-slate-800" />
                 </div>
             </div>
 
@@ -87,8 +128,6 @@ export const Dashboard: React.FC = () => {
                     <span className="text-xs font-bold">All services operational</span>
                 </div>
             </div>
-
-            {/* Decorative element */}
             <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-[100px]"></div>
         </div>
       </div>
@@ -102,8 +141,8 @@ const StatCard = ({ title, value, icon: Icon, trend, color, bg }: any) => (
         <div className={`${bg} ${color} p-4 rounded-2xl shadow-inner group-hover:scale-110 transition-transform`}>
             <Icon size={24} />
         </div>
-        <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-[10px] font-black ${trend.startsWith('+') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-            {trend.startsWith('+') ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+        <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-[10px] font-black ${trend.startsWith('+') ? 'bg-green-50 text-green-600' : (trend === 'Active' || trend === 'Normal') ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'}`}>
+            {trend.startsWith('+') ? <ArrowUpRight size={12} /> : trend.startsWith('-') ? <ArrowDownRight size={12} /> : null}
             <span>{trend}</span>
         </div>
     </div>

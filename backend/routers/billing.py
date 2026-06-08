@@ -69,8 +69,10 @@ def add_payment(bill_id: str, data: PaymentCreate, db: Session = Depends(get_db)
         all_bills = db.query(Bill).filter(Bill.order_id == order.id).all()
         if all(b.status == BillStatus.PAID for b in all_bills):
             order.status = OrderStatus.COMPLETED
-            from backend.routers.inventory import deduct_stock_for_order
-            deduct_stock_for_order(order.id, db)
+            if not order.stock_deducted:
+                from backend.routers.inventory import deduct_stock_for_order
+                deduct_stock_for_order(order.id, db)
+                order.stock_deducted = True
 
     db.commit()
     db.refresh(bill)

@@ -16,7 +16,11 @@ from backend.routers.staff import router as staff_router
 from backend.routers.delivery import router as delivery_router
 from backend.routers.loyalty import router as loyalty_router
 from backend.routers.reports import router as reports_router
+from backend.routers.reports_print import router as reports_print_router
 from backend.routers.print import router as print_router
+from backend.routers.audit import router as audit_router
+from backend.routers.system import router as system_router
+from backend.routers.waitlist import router as waitlist_router
 from backend.routers.attendance import router as attendance_router
 from backend.routers.reconciliation import router as reconciliation_router
 
@@ -47,9 +51,13 @@ app.include_router(staff_router)
 app.include_router(delivery_router)
 app.include_router(loyalty_router)
 app.include_router(reports_router)
+app.include_router(reports_print_router)
 app.include_router(print_router)
 app.include_router(attendance_router)
 app.include_router(reconciliation_router)
+app.include_router(audit_router)
+app.include_router(system_router)
+app.include_router(waitlist_router)
 
 @app.get("/health")
 def health_check():

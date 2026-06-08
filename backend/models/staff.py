@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Enum, ForeignKey, JSON, DateTime
+from sqlalchemy import Column, String, Integer, Enum, ForeignKey, JSON, DateTime
 from sqlalchemy.orm import relationship
 from backend.database import Base
 from backend.models.base import BaseMixin
@@ -22,5 +22,7 @@ class Staff(Base, BaseMixin):
     photo_url = Column(String, nullable=True)
     employment_date = Column(DateTime, default=datetime.utcnow)
     status = Column(Enum(StaffStatus), default=StaffStatus.ACTIVE)
+
+    hourly_rate = Column(Integer, default=0) # In pesewas
 
     user = relationship("User")

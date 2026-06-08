@@ -21,4 +21,5 @@ class Business(Base, BaseMixin):
     currency = Column(String, default="GHS")
     tax_rate = Column(Integer, default=1500) # 15% in basis points
     tax_enabled = Column(Boolean, default=True)
+    tin = Column(String, nullable=True)
     mode = Column(Enum(BusinessMode), nullable=False)

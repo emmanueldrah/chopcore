@@ -109,7 +109,33 @@ def complete_order(order_id: str, db: Session = Depends(get_db)):
         if table:
             table.status = TableStatus.AVAILABLE
 
-    deduct_stock_for_order(order.id, db)
+    if not order.stock_deducted:
+        deduct_stock_for_order(order.id, db)
+        order.stock_deducted = True
+
+    db.commit()
+    return {"success": True}
+
+class VoidItemRequest(BaseModel):
+    reason: str
+    manager_id: str # Approval
+
+@router.post("/items/{item_id}/void")
+def void_item(item_id: str, data: VoidItemRequest, db: Session = Depends(get_db)):
+    from backend.models.user import User, UserRole
+    manager = db.query(User).filter(User.id == data.manager_id).first()
+    if not manager or manager.role not in [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.MANAGER]:
+        raise HTTPException(status_code=403, detail="Manager approval required")
+
+    item = db.query(OrderItem).filter(OrderItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    item.status = OrderItemStatus.CANCELLED
+
+    # Log to audit
+    from backend.routers.audit import log_action
+    log_action(db, manager.id, "VOID_ITEM", {"item_id": item_id, "reason": data.reason})
 
     db.commit()
     return {"success": True}

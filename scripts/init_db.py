@@ -21,13 +21,16 @@ import backend.models.stock
 import backend.models.staff
 import backend.models.customer
 import backend.models.loyalty
+import backend.models.audit
+import backend.models.attendance
+import backend.models.reconciliation
+import backend.models.waitlist
 
 def init_db():
     print("Initializing database...")
     Base.metadata.create_all(bind=engine)
     print("Database initialized.")
 
-    # Run seed
     from scripts.seed import seed_data
     seed_data()
 

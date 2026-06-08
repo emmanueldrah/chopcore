@@ -34,6 +34,7 @@ class Order(Base, BaseMixin):
     tax_amount = Column(Integer, default=0)
     delivery_fee = Column(Integer, default=0)
     total_amount = Column(Integer, default=0)
+    stock_deducted = Column(Boolean, default=False)
 
     table = relationship("Table")
     waiter = relationship("User", foreign_keys=[waiter_id])

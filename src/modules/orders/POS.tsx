@@ -1,3 +1,4 @@
+import { useTerminology } from '../../hooks/useTerminology';
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
@@ -8,6 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 
 export const POS: React.FC = () => {
   const { mode } = useBusinessStore();
+  const t = useTerminology(mode);
   const [searchParams] = useSearchParams();
   const tableId = searchParams.get('table');
   const tableNumber = searchParams.get('number');
@@ -237,7 +239,7 @@ export const POS: React.FC = () => {
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-3xl font-black flex items-center space-x-3 tracking-tighter uppercase italic">
                     <ShoppingBag className="text-primary" />
-                    <span>Current Order</span>
+                    <span>{t('orders')}</span>
                 </h2>
                 <div className="flex bg-slate-100 rounded-2xl p-1">
                     {['DINE_IN', 'TAKEAWAY'].map(t => (

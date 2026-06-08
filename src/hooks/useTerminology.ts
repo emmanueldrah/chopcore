@@ -9,6 +9,9 @@ export const useTerminology = (mode: BusinessMode | null) => {
       customer: 'Customer',
       reservation: 'Pre-order',
       pos: 'Counter POS',
+      bill: 'Ticket',
+      table: 'Counter',
+      waiter: 'Cashier',
     },
     [BusinessMode.SIT_DOWN]: {
       orders: 'Orders',
@@ -17,6 +20,9 @@ export const useTerminology = (mode: BusinessMode | null) => {
       customer: 'Guest',
       reservation: 'Reservation',
       pos: 'Table POS',
+      bill: 'Bill',
+      table: 'Table',
+      waiter: 'Waiter',
     },
     [BusinessMode.CHOP_BAR]: {
       orders: 'Sales',
@@ -25,6 +31,9 @@ export const useTerminology = (mode: BusinessMode | null) => {
       customer: 'Customer',
       reservation: 'Booking',
       pos: 'POS',
+      bill: 'Chit',
+      table: 'Spot',
+      waiter: 'Attendant',
     },
     [BusinessMode.CATERING]: {
       orders: 'Events',
@@ -33,6 +42,9 @@ export const useTerminology = (mode: BusinessMode | null) => {
       customer: 'Client',
       reservation: 'Event Booking',
       pos: 'Event POS',
+      bill: 'Invoice',
+      table: 'Venue',
+      waiter: 'Server',
     },
   };
 

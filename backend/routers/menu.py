@@ -6,6 +6,7 @@ from backend.models.menu_item import MenuItem
 from backend.models.modifier import ModifierGroup, ModifierOption, MenuItemModifierGroup
 from pydantic import BaseModel
 from typing import List, Optional
+from datetime import datetime
 
 router = APIRouter(prefix="/api/v1/menu", tags=["menu"])
 
@@ -26,6 +27,7 @@ class MenuItemBase(BaseModel):
     is_available: bool = True
     prep_time: int = 15
     tags: List[str] = []
+    time_availability: Optional[dict] = {"breakfast": True, "lunch": True, "dinner": True}
 
 class MenuItemCreate(MenuItemBase):
     pass
@@ -43,11 +45,27 @@ def create_category(data: CategoryCreate, db: Session = Depends(get_db)):
     return category
 
 @router.get("/items")
-def get_menu_items(category_id: Optional[str] = None, db: Session = Depends(get_db)):
+def get_menu_items(category_id: Optional[str] = None, available_now: bool = False, db: Session = Depends(get_db)):
     query = db.query(MenuItem)
     if category_id:
         query = query.filter(MenuItem.category_id == category_id)
-    return query.all()
+
+    items = query.all()
+
+    if available_now:
+        # Determine current meal time
+        hour = datetime.utcnow().hour
+        meal = "dinner"
+        if 5 <= hour < 11: meal = "breakfast"
+        elif 11 <= hour < 16: meal = "lunch"
+
+        filtered = []
+        for item in items:
+            if item.time_availability and item.time_availability.get(meal, True):
+                filtered.append(item)
+        return filtered
+
+    return items
 
 @router.post("/items")
 def create_menu_item(data: MenuItemCreate, db: Session = Depends(get_db)):
