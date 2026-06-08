@@ -15,11 +15,12 @@ class PaymentCreate(BaseModel):
 
 class BillCreate(BaseModel):
     order_id: str
-    discount_amount: int = 0
+    total_amount: Optional[int] = None # For splits
+    is_split: bool = False
 
 @router.get("/{order_id}")
-def get_bill_for_order(order_id: str, db: Session = Depends(get_db)):
-    return db.query(Bill).filter(Bill.order_id == order_id).first()
+def get_bills_for_order(order_id: str, db: Session = Depends(get_db)):
+    return db.query(Bill).filter(Bill.order_id == order_id).all()
 
 @router.post("/")
 def create_bill(data: BillCreate, db: Session = Depends(get_db)):
@@ -28,13 +29,16 @@ def create_bill(data: BillCreate, db: Session = Depends(get_db)):
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
+    amount = data.total_amount if data.total_amount is not None else order.total_amount
+
     bill = Bill(
         order_id=order.id,
         subtotal=order.subtotal,
-        discount_amount=data.discount_amount,
+        discount_amount=0,
         tax_amount=order.tax_amount,
         delivery_fee=order.delivery_fee,
-        total_amount=order.total_amount - data.discount_amount
+        total_amount=amount,
+        is_split=data.is_split
     )
     db.add(bill)
     db.commit()
@@ -55,10 +59,18 @@ def add_payment(bill_id: str, data: PaymentCreate, db: Session = Depends(get_db)
     )
     db.add(payment)
 
-    # Check if bill is fully paid
     total_paid = sum(p.amount for p in bill.payments) + data.amount
     if total_paid >= bill.total_amount:
         bill.status = BillStatus.PAID
+
+        # Check if all bills for this order are paid
+        from backend.models.order import Order, OrderStatus
+        order = db.query(Order).filter(Order.id == bill.order_id).first()
+        all_bills = db.query(Bill).filter(Bill.order_id == order.id).all()
+        if all(b.status == BillStatus.PAID for b in all_bills):
+            order.status = OrderStatus.COMPLETED
+            from backend.routers.inventory import deduct_stock_for_order
+            deduct_stock_for_order(order.id, db)
 
     db.commit()
     db.refresh(bill)
