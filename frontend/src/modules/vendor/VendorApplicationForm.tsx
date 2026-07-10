@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
 import { supabase } from '../../lib/supabase';
+import axios from 'axios';
 
 const vendorSchema = z.object({
   businessName: z.string().min(2, "Business name is too short"),
@@ -15,9 +16,12 @@ const vendorSchema = z.object({
 
 type VendorFormValues = z.infer<typeof vendorSchema>;
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export const VendorApplicationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [files, setFiles] = useState<{ [key: string]: File | null }>({});
+  const [success, setSuccess] = useState(false);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<VendorFormValues>({
     resolver: zodResolver(vendorSchema),
@@ -35,19 +39,25 @@ export const VendorApplicationForm = () => {
     setIsSubmitting(true);
     try {
       // 1. Upload documents to private bucket
-      const uploads = [];
+      let docUrl = '';
       for (const [type, file] of Object.entries(files)) {
         if (file) {
           const path = `verification/${Date.now()}_${file.name}`;
-          uploads.push(supabase.storage.from('vendor-docs').upload(path, file));
+          const { data: uploadData, error } = await supabase.storage.from('vendor-docs').upload(path, file);
+          if (error) throw error;
+          if (type === 'ghanaCard') docUrl = uploadData.path;
         }
       }
-      await Promise.all(uploads);
 
       // 2. Submit application to backend
-      // await axios.post('/v1/vendors/apply', { ...data, docs: uploads.map(u => u.data.path) });
+      await axios.post(`${API_URL}/v1/vendors/apply`, {
+        business_name: data.businessName,
+        category: data.category,
+        address_text: data.addressText,
+        verification_doc_url: docUrl
+      });
 
-      alert('Application submitted successfully!');
+      setSuccess(true);
     } catch (error) {
       console.error(error);
       alert('Failed to submit application');
@@ -55,6 +65,16 @@ export const VendorApplicationForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="p-8 max-w-2xl mx-auto my-12 text-center space-y-4">
+        <h2 className="text-3xl font-display font-bold text-deepPalm">Application Received!</h2>
+        <p className="text-charcoalInk/60">Our team will review your application and documents. You'll receive an SMS update once approved.</p>
+        <Button onClick={() => window.location.href = '/'}>Back to Home</Button>
+      </div>
+    );
+  }
 
   return (
     <Card className="p-8 max-w-2xl mx-auto my-12">

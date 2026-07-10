@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
-from app.middleware.auth import get_current_user
+from app.middleware.auth import get_current_user, check_role
 from app.db.session import get_db
-from app.models.models import Order, OrderItem, OrderStatus, Item, EscrowStatus
+from app.models.models import Order, OrderItem, OrderStatus, Item, EscrowStatus, Vendor
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
@@ -31,8 +31,9 @@ async def create_order(
         raise HTTPException(status_code=400, detail="Idempotency-Key header required")
 
     # 1. Check for existing order with same idempotency key
-    existing_order = await db.execute(select(Order).where(Order.idempotency_key == idempotency_key))
-    existing = existing_order.scalars().first()
+    existing_order_stmt = select(Order).where(Order.idempotency_key == idempotency_key)
+    existing_order_result = await db.execute(existing_order_stmt)
+    existing = existing_order_result.scalars().first()
     if existing:
         return existing
 
@@ -67,10 +68,9 @@ async def create_order(
         # Deduct stock
         item.stock_quantity -= item_in.quantity
 
-    # 3. Calculate commission (mocked 10%)
+    # 3. Calculate commission (mocked 10% snapshot)
     commission_rate = 0.10
     commission = int(subtotal * commission_rate)
-    total = subtotal # In some models total = subtotal + fees. Requirements say "commission per completed order"
 
     # 4. Create Order
     new_order = Order(
@@ -80,7 +80,7 @@ async def create_order(
         status=OrderStatus.PLACED,
         subtotal_pesewas=subtotal,
         commission_pesewas=commission,
-        total_pesewas=subtotal,
+        total_pesewas=subtotal, # total includes commission internally
         commission_rate_snapshot=commission_rate,
         escrow_status=EscrowStatus.HELD,
         idempotency_key=idempotency_key,
@@ -93,7 +93,7 @@ async def create_order(
 
     return new_order
 
-@router.patch("/{order_id}/status", dependencies=[Depends(get_current_user)])
+@router.patch("/{order_id}/status")
 async def update_order_status(
     order_id: str,
     new_status: OrderStatus,
@@ -104,12 +104,20 @@ async def update_order_status(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    # Ownership check: Only the assigned vendor or admin can change status
-    # (Assuming user['sub'] is the user ID and we need to check if they own the vendor)
-    # For now, simplistic check if user role is admin or vendor_owner
-    if user.get("app_metadata", {}).get("role") == "vendor_owner":
-        # Additional check should be done here to ensure they own THIS vendor
-        pass
+    user_role = user.get("app_metadata", {}).get("role") or user.get("user_metadata", {}).get("role")
+
+    # Ownership Check
+    if user_role == "vendor_owner":
+        # Check if this user owns the vendor associated with the order
+        vendor_stmt = select(Vendor).where(Vendor.owner_user_id == user["sub"])
+        vendor_result = await db.execute(vendor_stmt)
+        vendor = vendor_result.scalars().first()
+        if not vendor or vendor.id != order.vendor_id:
+            raise HTTPException(status_code=403, detail="Unauthorized: You do not own this order's vendor")
+    elif user_role == "admin":
+        pass # Admins can change status
+    else:
+        raise HTTPException(status_code=403, detail="Unauthorized")
 
     # State machine transition rules
     allowed_transitions = {

@@ -4,9 +4,12 @@ import { Button } from '../../components/ui/Button';
 import { useCartStore } from '../../store/useCartStore';
 import { Phone, CheckCircle2, ChevronRight, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const CheckoutPage = () => {
-  const { items, clearCart } = useCartStore();
+  const { items, clearCart, vendorId } = useCartStore();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -15,12 +18,24 @@ export const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      const idempotencyKey = crypto.randomUUID();
+      const response = await axios.post(`${API_URL}/v1/orders/`, {
+        vendor_id: vendorId,
+        delivery_address_id: "00000000-0000-0000-0000-000000000000", // Placeholder for actual address
+        items: items.map(i => ({ item_id: i.id, quantity: i.quantity }))
+      }, {
+        headers: { 'Idempotency-Key': idempotencyKey }
+      });
+
       clearCart();
-      navigate('/order-tracking/mock-order-id');
-    }, 2000);
+      navigate(`/order-tracking/${response.data.id}`);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to place order');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
