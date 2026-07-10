@@ -3,10 +3,14 @@ uvicorn
 sqlalchemy
 alembic
 psycopg2-binary
+asyncpg
 pydantic
 pydantic-settings
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
-weasyprint
-websockets
+supabase
+httpx
+sentry-sdk[fastapi]
+pytest
+pytest-asyncio
