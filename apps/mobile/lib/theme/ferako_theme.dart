@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class FerakoColors {
   static const Color marketClay = Color(0xFFC6602E);
@@ -24,22 +25,31 @@ class FerakoTheme {
         error: FerakoColors.ripePepper,
       ),
       scaffoldBackgroundColor: FerakoColors.harmattanSand,
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          fontFamily: 'Fraunces',
+      textTheme: GoogleFonts.interTextTheme().copyWith(
+        displayLarge: GoogleFonts.fraunces(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: FerakoColors.deepPalm,
         ),
-        bodyLarge: TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 16,
-          color: FerakoColors.charcoalInk,
+        displayMedium: GoogleFonts.fraunces(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: FerakoColors.deepPalm,
+        ),
+        titleMedium: GoogleFonts.fraunces(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: FerakoColors.deepPalm,
         ),
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: FerakoColors.deepPalm,
         foregroundColor: FerakoColors.harmattanSand,
+        titleTextStyle: GoogleFonts.fraunces(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: FerakoColors.harmattanSand,
+        ),
       ),
     );
   }

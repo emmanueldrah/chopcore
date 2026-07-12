@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ferako/theme/ferako_theme.dart';
+import 'package:ferako/widgets/ferako_card.dart';
+import 'package:ferako/buyer/vendor_storefront_screen.dart';
 
 class BuyerHomeScreen extends StatelessWidget {
   const BuyerHomeScreen({super.key});
@@ -43,8 +45,68 @@ class BuyerHomeScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
             ),
             const SizedBox(height: 16),
-            // Placeholder for vendor list
-            const Center(child: Text('Coming soon...', style: TextStyle(fontFamily: 'Inter'))),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: FerakoCard(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const VendorStorefrontScreen(
+                            vendorName: 'Local Market Stall',
+                            category: 'Produce',
+                          ),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(10),
+                          ),
+                          child: Image.network(
+                            'https://via.placeholder.com/100',
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Local Market Stall',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const Text('Produce • 15-25 min', style: TextStyle(fontSize: 12)),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: const [
+                                    Icon(Icons.star, color: FerakoColors.marketClay, size: 16),
+                                    SizedBox(width: 4),
+                                    Text('4.5', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
