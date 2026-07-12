@@ -1,28 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'core/theme/ferako_theme.dart';
-import 'shared/widgets/ferako_button.dart';
-import 'shared/widgets/ferako_card.dart';
-import 'shared/widgets/woven_pattern.dart';
+import 'package:ferako/theme/ferako_theme.dart';
+import 'package:ferako/widgets/ferako_button.dart';
+import 'package:ferako/auth/phone_auth_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  try {
-    await Supabase.initialize(
-      url: 'https://placeholder.supabase.co',
-      anonKey: 'placeholder',
-    );
-  } catch (e) {
-    debugPrint('Supabase init failed: $e');
-  }
-
-  runApp(
-    const ProviderScope(
-      child: FerakoApp(),
-    ),
-  );
+void main() {
+  runApp(const FerakoApp());
 }
 
 class FerakoApp extends StatelessWidget {
@@ -33,90 +15,93 @@ class FerakoApp extends StatelessWidget {
     return MaterialApp(
       title: 'Ferako',
       theme: FerakoTheme.lightTheme,
-      debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
+      home: const PhoneAuthScreen(),
+      routes: {
+        '/style-guide': (context) => const StyleGuideScreen(),
+      },
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class StyleGuideScreen extends StatelessWidget {
+  const StyleGuideScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          const WovenPattern(),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Ferako',
-                    style: TextStyle(
-                      fontSize: 56,
-                      fontWeight: FontWeight.bold,
-                      color: FerakoTheme.deepPalm,
-                      fontFamily: 'Fraunces-Bold',
-                    ),
-                  ),
-                  const Text(
-                    'Africa\'s Digital Commerce OS',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: FerakoTheme.marketClay,
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-                  const FerakoCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'A unified commerce platform for trusted businesses and local delivery.',
-                          style: TextStyle(fontSize: 18, color: FerakoTheme.charcoalInk),
-                        ),
-                        SizedBox(height: 16),
-                        Row(
-                          children: [
-                            CircleAvatar(radius: 4, backgroundColor: FerakoTheme.beverageTeal),
-                            SizedBox(width: 8),
-                            Text(
-                              'HO • VOLTA REGION',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  FerakoButton(
-                    title: 'Start Shopping',
-                    onPress: () {},
-                  ),
-                  const SizedBox(height: 16),
-                  FerakoButton(
-                    title: 'I want to sell',
-                    isOutline: true,
-                    onPress: () {},
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      appBar: AppBar(
+        title: const Text('Ferako Style Guide'),
       ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Typography',
+              style: Theme.of(context).textTheme.displayLarge,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'This is body text using Inter font. Highly legible for small screens.',
+              style: TextStyle(fontFamily: 'Inter'),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Colors',
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _ColorBox(color: FerakoColors.marketClay, label: 'Market Clay'),
+                _ColorBox(color: FerakoColors.deepPalm, label: 'Deep Palm'),
+                _ColorBox(color: FerakoColors.beverageTeal, label: 'Bev Teal'),
+              ],
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Buttons',
+              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+            ),
+            const SizedBox(height: 16),
+            FerakoButton(
+              label: 'Primary Action',
+              onPressed: () {},
+            ),
+            const SizedBox(height: 16),
+            const FerakoButton(
+              label: 'Loading State',
+              isLoading: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ColorBox extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _ColorBox({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          margin: const EdgeInsets.only(right: 8),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
     );
   }
 }

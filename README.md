@@ -1,28 +1,55 @@
-# Ferako - Local Commerce Marketplace
+# Ferako Marketplace
 
-Ferako is a multi-vendor local commerce marketplace serving Ho and the Volta Region, Ghana.
+Ferako is a multi-vendor local commerce marketplace serving Ho and the Volta Region, Ghana. Buyers order from independent local vendors across four categories — food, pharmacy (OTC only), fruits & vegetables, and beverages.
 
 ## Tech Stack
-- **Frontend**: React 18, TypeScript, Tailwind CSS, Zustand, React Query
-- **Backend**: FastAPI, SQLAlchemy 2.0, PostgreSQL
-- **Infrastructure**: Supabase (Auth, DB, Storage, Realtime)
-- **Payments**: Internal Adapter (Mocked)
-- **SMS**: Internal Adapter (Hubtel)
+
+- **Monorepo:** Dart / Flutter
+- **Frontend:** Flutter (Mobile-first responsive web + native)
+- **Backend:** Dart (Shelf)
+- **Shared Logic:** `ferako_core` (Dart package)
+- **Database:** PostgreSQL (via Supabase)
+- **Auth:** Supabase Auth (Phone OTP)
+
+## Project Structure
+
+- `apps/mobile`: Flutter mobile/web application.
+- `apps/server`: Dart server application.
+- `packages/ferako_core`: Shared DTOs, Enums, and business logic.
+- `sql/migrations`: PostgreSQL schema migrations.
 
 ## Getting Started
 
-### Backend
-1. `cd backend`
-2. `pip install -r requirements.txt`
-3. `uvicorn main:app --reload --port 8000`
+### Prerequisites
 
-### Frontend
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
+- [Flutter SDK](https://docs.flutter.dev/get-started/install)
+- [Dart SDK](https://dart.dev/get-started/sdk)
 
-## Project Structure
-- `backend/app/models`: SQLAlchemy data models
-- `backend/app/api`: FastAPI routers and endpoints
-- `frontend/src/modules`: Role-based feature modules (Buyer, Vendor, Admin)
-- `frontend/src/components/ui`: Base accessible design system components
+### Setup
+
+1. Install dependencies for all packages:
+   ```bash
+   cd packages/ferako_core && dart pub get
+   cd ../../apps/mobile && flutter pub get
+   cd ../server && dart pub get
+   ```
+
+2. Run the server:
+   ```bash
+   cd apps/server
+   dart run bin/server.dart
+   ```
+
+3. Run the mobile/web app:
+   ```bash
+   cd apps/mobile
+   flutter run -d chrome # For web
+   ```
+
+## Development
+
+### Database Migrations
+Migrations are located in `sql/migrations`. Apply them to your Supabase project via the Supabase SQL Editor.
+
+### Testing
+Each package/app has its own tests. Run them using `dart test` or `flutter test`.
