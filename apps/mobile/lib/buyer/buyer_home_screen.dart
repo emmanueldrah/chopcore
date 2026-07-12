@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ferako/theme/ferako_theme.dart';
 import 'package:ferako/widgets/ferako_card.dart';
 import 'package:ferako/buyer/vendor_storefront_screen.dart';
+import 'package:ferako/widgets/basket_weave_background.dart';
 
 class BuyerHomeScreen extends StatelessWidget {
   const BuyerHomeScreen({super.key});
@@ -9,104 +10,50 @@ class BuyerHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ferako', style: TextStyle(fontFamily: 'Fraunces')),
-        actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.shopping_cart), onPressed: () {}),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Categories',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
-            ),
-            const SizedBox(height: 16),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              children: [
-                _CategoryTile(label: 'Food', color: FerakoColors.marketClay, icon: Icons.restaurant),
-                _CategoryTile(label: 'Pharmacy', color: FerakoColors.beverageTeal, icon: Icons.medical_services),
-                _CategoryTile(label: 'Produce', color: FerakoColors.deepPalm, icon: Icons.agriculture),
-                _CategoryTile(label: 'Beverages', color: Colors.orange, icon: Icons.local_drink),
+      body: BasketWeaveBackground(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              title: const Text('Ferako'),
+              actions: [
+                IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
+                IconButton(icon: const Icon(Icons.shopping_basket_outlined), onPressed: () {}),
               ],
             ),
-            const SizedBox(height: 32),
-            Text(
-              'Nearby Vendors',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    _SearchBar(),
+                    const SizedBox(height: 24),
+                    _SectionHeader(title: 'Market Categories'),
+                    const SizedBox(height: 16),
+                    _CategoryGrid(),
+                    const SizedBox(height: 32),
+                    _SectionHeader(title: 'Recently Ordered From'),
+                    const SizedBox(height: 16),
+                    _RecentVendorsList(),
+                    const SizedBox(height: 32),
+                    _SectionHeader(title: 'Nearby Vendors'),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: FerakoCard(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const VendorStorefrontScreen(
-                            vendorName: 'Local Market Stall',
-                            category: 'Produce',
-                          ),
-                        ),
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            bottomLeft: Radius.circular(10),
-                          ),
-                          child: Image.network(
-                            'https://via.placeholder.com/100',
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Local Market Stall',
-                                  style: Theme.of(context).textTheme.titleMedium,
-                                ),
-                                const Text('Produce • 15-25 min', style: TextStyle(fontSize: 12)),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: const [
-                                    Icon(Icons.star, color: FerakoColors.marketClay, size: 16),
-                                    SizedBox(width: 4),
-                                    Text('4.5', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => _VendorListCard(index: index),
+                  childCount: 5,
+                ),
+              ),
             ),
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
           ],
         ),
       ),
@@ -114,56 +61,185 @@ class BuyerHomeScreen extends StatelessWidget {
   }
 }
 
-class _CategoryTile extends StatelessWidget {
-  final String label;
-  final Color color;
-  final IconData icon;
-
-  const _CategoryTile({required this.label, required this.color, required this.icon});
-
+class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 52,
       decoration: BoxDecoration(
-        color: color,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        image: const DecorationImage(
-          image: NetworkImage('https://via.placeholder.com/150'), // Placeholder for full-bleed photo
-          fit: BoxFit.cover,
-          opacity: 0.6,
-        ),
+        boxShadow: [
+          BoxShadow(color: FerakoColors.shadowWarm, blurRadius: 10, offset: const Offset(0, 4)),
+        ],
       ),
+      child: Row(
+        children: const [
+          Icon(Icons.search, color: FerakoColors.marketClay),
+          SizedBox(width: 12),
+          Text('Search food, medicines, produce...', style: TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(title, style: Theme.of(context).textTheme.displayMedium);
+  }
+}
+
+class _CategoryGrid extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      childAspectRatio: 1.4,
+      children: [
+        _CategoryCard(title: 'Food', color: FerakoColors.marketClay, image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop'),
+        _CategoryCard(title: 'Pharmacy', color: FerakoColors.beverageTeal, image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop'),
+        _CategoryCard(title: 'Produce', color: FerakoColors.deepPalm, image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=400&auto=format&fit=crop'),
+        _CategoryCard(title: 'Beverages', color: Colors.orange, image: 'https://images.unsplash.com/photo-1544145945-f904253db0ad?q=80&w=400&auto=format&fit=crop'),
+      ],
+    );
+  }
+}
+
+class _CategoryCard extends StatelessWidget {
+  final String title;
+  final Color color;
+  final String image;
+
+  const _CategoryCard({required this.title, required this.color, required this.image});
+
+  @override
+  Widget build(BuildContext context) {
+    return FerakoCard(
+      onTap: () {},
       child: Stack(
+        fit: StackFit.expand,
         children: [
+          Image.network(image, fit: BoxFit.cover),
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
               ),
             ),
           ),
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: Colors.white, size: 40),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Fraunces',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+            child: Text(
+              title,
+              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Fraunces'),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RecentVendorsList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 4,
+        itemBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: Colors.white,
+                backgroundImage: NetworkImage('https://i.pravatar.cc/100?u=$index'),
+              ),
+              const SizedBox(height: 8),
+              const Text('Vendor Name', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VendorListCard extends StatelessWidget {
+  final int index;
+  const _VendorListCard({required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: FerakoCard(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const VendorStorefrontScreen(vendorName: 'Mawuli Market Stall', category: 'Produce'),
+            ),
+          );
+        },
+        child: Column(
+          children: [
+            Container(
+              height: 140,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage('https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=600&auto=format&fit=crop'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Mawuli Market Stall', style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 4),
+                        const Text('Produce • ₵₵ • 15-20 min', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: FerakoColors.harmattanSand,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.star, color: FerakoColors.marketClay, size: 16),
+                        SizedBox(width: 4),
+                        Text('4.9', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

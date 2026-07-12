@@ -8,30 +8,48 @@ class BasketWeaveBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: CustomPaint(
-            painter: _BasketWeavePainter(),
+    return Container(
+      color: FerakoColors.harmattanSand,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.04,
+              child: CustomPaint(
+                painter: _OrganicWeavePainter(),
+              ),
+            ),
           ),
-        ),
-        child,
-      ],
+          child,
+        ],
+      ),
     );
   }
 }
 
-class _BasketWeavePainter extends CustomPainter {
+class _OrganicWeavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = FerakoColors.marketClay.withOpacity(0.03)
-      ..strokeWidth = 1.0;
+      ..color = FerakoColors.charcoalInk
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
 
-    const spacing = 20.0;
-    for (var i = 0.0; i < size.width + size.height; i += spacing) {
-      canvas.drawLine(Offset(i, 0), Offset(0, i), paint);
-      canvas.drawLine(Offset(size.width - i, 0), Offset(size.width, i), paint);
+    const double gap = 24.0;
+
+    // Diagonal lines for weave effect
+    for (double i = -size.height; i < size.width; i += gap) {
+      final path = Path()
+        ..moveTo(i, 0)
+        ..lineTo(i + size.height, size.height);
+      canvas.drawPath(path, paint);
+    }
+
+    for (double i = gap; i < size.width + size.height; i += gap) {
+      final path = Path()
+        ..moveTo(i, 0)
+        ..lineTo(i - size.height, size.height);
+      canvas.drawPath(path, paint);
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ferako/theme/ferako_theme.dart';
 import 'package:ferako/widgets/ferako_card.dart';
 import 'package:ferako/widgets/basket_weave_background.dart';
+import 'package:ferako/buyer/item_detail_screen.dart';
 
 class VendorStorefrontScreen extends StatelessWidget {
   final String vendorName;
@@ -73,6 +74,14 @@ class VendorStorefrontScreen extends StatelessWidget {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     return FerakoCard(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ItemDetailScreen(itemName: 'Kelewele', price: '₵ 25.00'),
+                          ),
+                        );
+                      },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -80,7 +89,7 @@ class VendorStorefrontScreen extends StatelessWidget {
                             child: ClipRRect(
                               borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
                               child: Image.network(
-                                'https://via.placeholder.com/150',
+                                'https://images.unsplash.com/photo-1594973585977-9f48a1a7bd85?q=80&w=300&auto=format&fit=crop',
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -91,8 +100,8 @@ class VendorStorefrontScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Item Name', style: TextStyle(fontWeight: FontWeight.bold)),
-                                const Text('₵ 25.00', style: TextStyle(color: FerakoColors.marketClay)),
+                                const Text('Kelewele', style: TextStyle(fontWeight: FontWeight.bold)),
+                                const Text('₵ 25.00', style: TextStyle(color: FerakoColors.marketClay, fontFamily: 'Inter')),
                               ],
                             ),
                           ),
