@@ -11,13 +11,11 @@ class FerakoColors {
   static const Color charcoalInk = Color(0xFF2B2320);
 
   // Surface & Accent
-  static final Color shadowWarm = marketClay.withOpacity(0.08);
+  static final Color shadowWarm = marketClay.withOpacity(0.12);
 }
 
 class FerakoTheme {
   static ThemeData get lightTheme {
-    final textTheme = GoogleFonts.interTextTheme();
-
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
@@ -29,46 +27,43 @@ class FerakoTheme {
         surface: FerakoColors.harmattanSand,
         onSurface: FerakoColors.charcoalInk,
         error: FerakoColors.ripePepper,
-        background: FerakoColors.harmattanSand,
       ),
       scaffoldBackgroundColor: FerakoColors.harmattanSand,
-      textTheme: textTheme.copyWith(
+      textTheme: GoogleFonts.interTextTheme().copyWith(
         displayLarge: GoogleFonts.fraunces(
           fontSize: 32,
           fontWeight: FontWeight.w800,
           color: FerakoColors.deepPalm,
           letterSpacing: -0.5,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
         displayMedium: GoogleFonts.fraunces(
           fontSize: 24,
           fontWeight: FontWeight.w700,
           color: FerakoColors.deepPalm,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
         titleMedium: GoogleFonts.fraunces(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: FerakoColors.deepPalm,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
+        // Force Tabular Figures for all body text by default if it contains numbers
         bodyLarge: GoogleFonts.inter(
           fontSize: 16,
           color: FerakoColors.charcoalInk,
-          height: 1.5,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
         bodyMedium: GoogleFonts.inter(
           fontSize: 14,
           color: FerakoColors.charcoalInk.withOpacity(0.8),
-        ),
-        labelSmall: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-          color: FerakoColors.deepPalm,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: false,
         titleTextStyle: GoogleFonts.fraunces(
           fontSize: 24,
           fontWeight: FontWeight.w800,

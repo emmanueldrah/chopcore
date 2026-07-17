@@ -56,11 +56,11 @@ class _OrderPipeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stages = [
-      {'status': OrderStatus.placed, 'label': 'Placed', 'icon': Icons.receipt_long},
-      {'status': OrderStatus.accepted, 'label': 'Accepted', 'icon': Icons.check_circle_outline},
-      {'status': OrderStatus.preparing, 'label': 'Preparing', 'icon': Icons.restaurant},
-      {'status': OrderStatus.outForDelivery, 'label': 'On the Way', 'icon': Icons.moped},
-      {'status': OrderStatus.delivered, 'label': 'Delivered', 'icon': Icons.home},
+      {'status': OrderStatus.placed, 'label': 'Placed', 'icon': Icons.receipt_long, 'color': FerakoColors.marketClay},
+      {'status': OrderStatus.accepted, 'label': 'Accepted', 'icon': Icons.check_circle_outline, 'color': FerakoColors.beverageTeal},
+      {'status': OrderStatus.preparing, 'label': 'Preparing', 'icon': Icons.restaurant, 'color': Colors.orange},
+      {'status': OrderStatus.outForDelivery, 'label': 'On the Way', 'icon': Icons.moped, 'color': Colors.purple},
+      {'status': OrderStatus.delivered, 'label': 'Delivered', 'icon': Icons.home, 'color': FerakoColors.deepPalm},
     ];
 
     int currentIndex = stages.indexWhere((s) => s['status'] == currentStatus);
@@ -81,7 +81,7 @@ class _OrderPipeline extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: isActive ? FerakoColors.marketClay : Colors.grey.shade300,
+                    color: isActive ? (stage['color'] as Color) : Colors.grey.shade300,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(stage['icon'] as IconData, size: 18, color: Colors.white),
@@ -90,7 +90,7 @@ class _OrderPipeline extends StatelessWidget {
                   Container(
                     width: 2,
                     height: 40,
-                    color: index < currentIndex ? FerakoColors.marketClay : Colors.grey.shade300,
+                    color: index < currentIndex ? (stages[index]['color'] as Color) : Colors.grey.shade300,
                   ),
               ],
             ),

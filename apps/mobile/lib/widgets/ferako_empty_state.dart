@@ -26,14 +26,9 @@ class FerakoEmptyState extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: FerakoColors.marketClay.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.shopping_basket_outlined, size: 60, color: FerakoColors.marketClay),
+              CustomPaint(
+                size: const Size(120, 120),
+                painter: _MarketBasketPainter(),
               ),
               const SizedBox(height: 32),
               Text(
@@ -58,4 +53,51 @@ class FerakoEmptyState extends StatelessWidget {
       ),
     );
   }
+}
+
+class _MarketBasketPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = FerakoColors.marketClay
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    final path = Path();
+
+    // Basket base (trapezoid)
+    path.moveTo(size.width * 0.2, size.height * 0.4);
+    path.lineTo(size.width * 0.8, size.height * 0.4);
+    path.lineTo(size.width * 0.7, size.height * 0.9);
+    path.lineTo(size.width * 0.3, size.height * 0.9);
+    path.close();
+
+    // Handle (arc)
+    path.moveTo(size.width * 0.2, size.height * 0.4);
+    path.quadraticBezierTo(
+      size.width * 0.5,
+      size.height * -0.1,
+      size.width * 0.8,
+      size.height * 0.4,
+    );
+
+    // Weave lines (horizontal)
+    path.moveTo(size.width * 0.23, size.height * 0.55);
+    path.lineTo(size.width * 0.77, size.height * 0.55);
+
+    path.moveTo(size.width * 0.27, size.height * 0.73);
+    path.lineTo(size.width * 0.73, size.height * 0.73);
+
+    // Weave lines (vertical)
+    path.moveTo(size.width * 0.4, size.height * 0.4);
+    path.lineTo(size.width * 0.43, size.height * 0.9);
+
+    path.moveTo(size.width * 0.6, size.height * 0.4);
+    path.lineTo(size.width * 0.57, size.height * 0.9);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

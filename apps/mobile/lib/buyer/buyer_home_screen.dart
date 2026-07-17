@@ -1,59 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:ferako/theme/ferako_theme.dart';
 import 'package:ferako/widgets/ferako_card.dart';
 import 'package:ferako/buyer/vendor_storefront_screen.dart';
 import 'package:ferako/widgets/basket_weave_background.dart';
+import 'package:ferako/widgets/language_switcher.dart';
+import 'package:ferako/widgets/filter_modal.dart';
+import 'package:ferako/widgets/offline_banner.dart';
+import 'package:ferako/widgets/filter_button.dart';
+import 'package:ferako/widgets/ferako_page_transitions.dart';
+import 'package:ferako/providers/localization_provider.dart';
+import 'package:ferako/widgets/promotional_banner.dart';
 
-class BuyerHomeScreen extends StatelessWidget {
+class BuyerHomeScreen extends ConsumerWidget {
   const BuyerHomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final i18n = ref.watch(localizationProvider.notifier);
+
     return Scaffold(
       body: BasketWeaveBackground(
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              title: const Text('Ferako'),
-              actions: [
-                IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
-                IconButton(icon: const Icon(Icons.shopping_basket_outlined), onPressed: () {}),
-              ],
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    _SearchBar(),
-                    const SizedBox(height: 24),
-                    _SectionHeader(title: 'Market Categories'),
-                    const SizedBox(height: 16),
-                    _CategoryGrid(),
-                    const SizedBox(height: 32),
-                    _SectionHeader(title: 'Recently Ordered From'),
-                    const SizedBox(height: 16),
-                    _RecentVendorsList(),
-                    const SizedBox(height: 32),
-                    _SectionHeader(title: 'Nearby Vendors'),
-                    const SizedBox(height: 16),
-                  ],
-                ),
+        child: Column(
+          children: [
+            const OfflineBanner(),
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    floating: true,
+                    title: const Text('Ferako'),
+                    actions: [
+                      const LanguageSwitcher(),
+                      IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
+                      IconButton(icon: const Icon(Icons.shopping_basket_outlined), onPressed: () {}),
+                    ],
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(child: _SearchBar(hint: i18n.translate('search_hint'))),
+                              const SizedBox(width: 12),
+                              const FilterButton(),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          const PromotionalBanner(),
+                          const SizedBox(height: 32),
+                          _SectionHeader(title: i18n.translate('categories')),
+                          const SizedBox(height: 16),
+                          _CategoryGrid(),
+                          const SizedBox(height: 32),
+                          _SectionHeader(title: i18n.translate('recently_ordered')),
+                          const SizedBox(height: 16),
+                          _RecentVendorsList(),
+                          const SizedBox(height: 32),
+                          _SectionHeader(title: i18n.translate('nearby')),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => AnimationConfiguration.staggeredList(
+                          position: index,
+                          duration: const Duration(milliseconds: 375),
+                          child: SlideAnimation(
+                            verticalOffset: 50.0,
+                            child: FadeInAnimation(
+                              child: _VendorListCard(index: index),
+                            ),
+                          ),
+                        ),
+                        childCount: 5,
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                ],
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => _VendorListCard(index: index),
-                  childCount: 5,
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 40)),
           ],
         ),
       ),
@@ -62,6 +98,9 @@ class BuyerHomeScreen extends StatelessWidget {
 }
 
 class _SearchBar extends StatelessWidget {
+  final String hint;
+  const _SearchBar({required this.hint});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -75,10 +114,10 @@ class _SearchBar extends StatelessWidget {
         ],
       ),
       child: Row(
-        children: const [
-          Icon(Icons.search, color: FerakoColors.marketClay),
-          SizedBox(width: 12),
-          Text('Search food, medicines, produce...', style: TextStyle(color: Colors.grey)),
+        children: [
+          const Icon(Icons.search, color: FerakoColors.marketClay),
+          const SizedBox(width: 12),
+          Text(hint, style: const TextStyle(color: Colors.grey)),
         ],
       ),
     );
@@ -190,20 +229,27 @@ class _VendorListCard extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const VendorStorefrontScreen(vendorName: 'Mawuli Market Stall', category: 'Produce'),
+            FerakoPageTransitions.createRoute(
+              VendorStorefrontScreen(
+                vendorName: 'Mawuli Market Stall',
+                category: 'Produce',
+                heroTag: 'vendor-image-$index',
+              ),
             ),
           );
         },
         child: Column(
           children: [
-            Container(
-              height: 140,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage('https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=600&auto=format&fit=crop'),
-                  fit: BoxFit.cover,
+            Hero(
+              tag: 'vendor-image-$index',
+              child: Container(
+                height: 140,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage('https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=600&auto=format&fit=crop'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),

@@ -4,6 +4,8 @@ import 'package:ferako/theme/ferako_theme.dart';
 import 'package:ferako_core/ferako_core.dart';
 import 'package:ferako/buyer/buyer_home_screen.dart';
 import 'package:ferako/vendor/vendor_application_screen.dart';
+import 'package:ferako/widgets/basket_weave_background.dart';
+import 'package:ferako/widgets/ferako_card.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -11,117 +13,98 @@ class RoleSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'How will you use Ferako?',
-              style: Theme.of(context).textTheme.displayLarge,
+      body: BasketWeaveBackground(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your journey starts here',
+                  style: Theme.of(context).textTheme.displayLarge,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Choose how you want to interact with the Ferako market.',
+                  style: TextStyle(fontFamily: 'Inter', color: Colors.grey),
+                ),
+                const SizedBox(height: 40),
+                _RoleCard(
+                  title: 'I want to Buy',
+                  description: 'Order food, groceries, and medicine from local artisans.',
+                  image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop',
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const BuyerHomeScreen()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                _RoleCard(
+                  title: 'I want to Sell',
+                  description: 'Join the marketplace and grow your business in Ho.',
+                  image: 'https://images.unsplash.com/photo-1488459711635-0c0048344558?q=80&w=400&auto=format&fit=crop',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const VendorApplicationScreen()),
+                    );
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 32),
-            _RoleCard(
-              title: 'I want to Buy',
-              description: 'Order food, groceries, and more from local vendors.',
-              icon: Icons.shopping_basket,
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const BuyerHomeScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            _RoleCard(
-              title: 'I want to Sell',
-              description: 'Register your business and reach more customers.',
-              icon: Icons.storefront,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const VendorApplicationScreen()),
-                );
-              },
-            ),
-          ],
+          ),
         ),
       ),
-    ));
+    );
   }
 }
 
 class _RoleCard extends StatelessWidget {
   final String title;
   final String description;
-  final IconData icon;
+  final String image;
   final VoidCallback onTap;
 
   const _RoleCard({
     required this.title,
     required this.description,
-    required this.icon,
+    required this.image,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return FerakoCard(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: FerakoColors.harmattanSand, width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: FerakoColors.marketClay.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: FerakoColors.marketClay, size: 32),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontFamily: 'Fraunces',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: FerakoColors.deepPalm,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
+      child: Column(
+        children: [
+          Container(
+            height: 120,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(image),
+                fit: BoxFit.cover,
+                opacity: 0.9,
               ),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                Text(description, style: const TextStyle(fontSize: 14, color: Colors.grey, height: 1.4)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ferako/theme/ferako_theme.dart';
-import 'package:ferako/widgets/ferako_button.dart';
-import 'package:ferako/auth/phone_auth_screen.dart';
+import 'package:ferako/auth/splash_screen.dart';
+import 'package:ferako/widgets/ferako_responsive_wrapper.dart';
 
 void main() {
-  runApp(const FerakoApp());
+  runApp(const ProviderScope(child: FerakoApp()));
 }
 
 class FerakoApp extends StatelessWidget {
@@ -15,7 +16,8 @@ class FerakoApp extends StatelessWidget {
     return MaterialApp(
       title: 'Ferako',
       theme: FerakoTheme.lightTheme,
-      home: const PhoneAuthScreen(),
+      builder: (context, child) => FerakoResponsiveWrapper(child: child!),
+      home: const SplashScreen(),
       routes: {
         '/style-guide': (context) => const StyleGuideScreen(),
       },
@@ -58,21 +60,6 @@ class StyleGuideScreen extends StatelessWidget {
                 _ColorBox(color: FerakoColors.deepPalm, label: 'Deep Palm'),
                 _ColorBox(color: FerakoColors.beverageTeal, label: 'Bev Teal'),
               ],
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'Buttons',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
-            ),
-            const SizedBox(height: 16),
-            FerakoButton(
-              label: 'Primary Action',
-              onPressed: () {},
-            ),
-            const SizedBox(height: 16),
-            const FerakoButton(
-              label: 'Loading State',
-              isLoading: true,
             ),
           ],
         ),

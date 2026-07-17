@@ -59,6 +59,13 @@ CREATE TABLE otc_categories (
     name TEXT NOT NULL
 );
 
+INSERT INTO otc_categories (name) VALUES
+('Pain Relievers'),
+('First Aid'),
+('Vitamins & Supplements'),
+('Sanitary Products'),
+('Basic Medical Supplies');
+
 -- Items Table
 CREATE TABLE items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
