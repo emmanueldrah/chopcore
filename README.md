@@ -1,40 +1,55 @@
-# ChopCore - Restaurant Management System
+# Ferako Marketplace
 
-ChopCore is a comprehensive restaurant management system designed for four food business types: Fast Food, Sit-down Restaurant, Chop Bar, and Catering. It is available as a cross-platform desktop app (Electron) and a web app (Docker).
+Ferako is a multi-vendor local commerce marketplace serving Ho and the Volta Region, Ghana. Buyers order from independent local vendors across four categories — food, pharmacy (OTC only), fruits & vegetables, and beverages.
 
-## Key Features
+## Tech Stack
 
-- **Mode-Aware System**: UI and API adapt based on the selected business type.
-- **POS & Table Management**: Visual floor plan with drag-and-drop.
-- **Real-time KDS**: WebSocket-based kitchen display with aging indicators.
-- **Inventory & Recipes**: Automatic stock deduction on order completion.
-- **Regional Support**: GHS ₵ currency, Ghana VAT (15%), and local payment methods (MTN MoMo, Vodafone Cash).
+- **Monorepo:** Dart / Flutter
+- **Frontend:** Flutter (Mobile-first responsive web + native)
+- **Backend:** Dart (Shelf)
+- **Shared Logic:** `ferako_core` (Dart package)
+- **Database:** PostgreSQL (via Supabase)
+- **Auth:** Supabase Auth (Phone OTP)
 
-## Development Setup
+## Project Structure
 
-### Backend
-1. Navigate to `backend/`
-2. Install dependencies: `pip install -r requirements.txt`
-3. Run FastAPI: `python main.py` (Runs on http://localhost:8768)
+- `apps/mobile`: Flutter mobile/web application.
+- `apps/server`: Dart server application.
+- `packages/ferako_core`: Shared DTOs, Enums, and business logic.
+- `sql/migrations`: PostgreSQL schema migrations.
 
-### Frontend
-1. Install dependencies: `npm install`
-2. Start dev server: `npm run dev`
+## Getting Started
 
-## Build Commands
+### Prerequisites
 
-### Desktop
-- Windows: `npm run dist:win`
-- Linux: `npm run dist:linux`
+- [Flutter SDK](https://docs.flutter.dev/get-started/install)
+- [Dart SDK](https://dart.dev/get-started/sdk)
 
-### Web (Docker)
-- `docker-compose up --build`
+### Setup
 
-## Credentials
-- Default Super Admin: (Configured during Setup Wizard)
+1. Install dependencies for all packages:
+   ```bash
+   cd packages/ferako_core && dart pub get
+   cd ../../apps/mobile && flutter pub get
+   cd ../server && dart pub get
+   ```
 
-## Business Modes
-Once set during the first-launch wizard, the business mode can only be reset by a Super Admin.
+2. Run the server:
+   ```bash
+   cd apps/server
+   dart run bin/server.dart
+   ```
 
-## KDS (Kitchen Display System)
-The KDS is designed to run on a separate monitor or tablet. Navigate to `/kitchen` in your browser or Electron window.
+3. Run the mobile/web app:
+   ```bash
+   cd apps/mobile
+   flutter run -d chrome # For web
+   ```
+
+## Development
+
+### Database Migrations
+Migrations are located in `sql/migrations`. Apply them to your Supabase project via the Supabase SQL Editor.
+
+### Testing
+Each package/app has its own tests. Run them using `dart test` or `flutter test`.
