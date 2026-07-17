@@ -37,10 +37,14 @@ class PromotionalBanner extends StatelessWidget {
                 ],
               ),
             ),
-            Image.network(
-              'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&auto=format&fit=crop',
-              width: 100,
-              fit: BoxFit.cover,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&auto=format&fit=crop',
+                width: 100,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
             ),
           ],
         ),
